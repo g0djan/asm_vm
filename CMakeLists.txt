@@ -13,9 +13,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(zfake_vm vm/vm.c)
 
-add_executable(zfake_asm asm/asm.c asm/f.c asm/f.h)
+add_executable(zfake_asm asm/asm.c asm/labels_table.c asm/labels_table.h asm/parser.c asm/parser.h asm/constants.h asm/encoder.c asm/encoder.h)
 
-add_executable(zfake_tests ${GTEST}/src/gtest_main.cc ${GTEST}/src/gtest-all.cc tests/check.cpp asm/f.c)
+add_executable(zfake_tests ${GTEST}/src/gtest_main.cc ${GTEST}/src/gtest-all.cc tests/check.cpp)
 
 ########################################
 # Custom Makefile
