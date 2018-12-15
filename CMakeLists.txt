@@ -11,7 +11,7 @@ include_directories(${GTEST} ${GTEST}/include)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(zfake_vm vm/vm.c)
+add_executable(zfake_vm vm/vm.c vm/constants.h vm/process.c vm/process.h vm/instructions.c vm/instructions.h vm/fetcher.c vm/fetcher.h)
 
 add_executable(zfake_asm asm/asm.c asm/labels_table.c asm/labels_table.h asm/parser.c asm/parser.h asm/constants.h asm/encoder.c asm/encoder.h)
 

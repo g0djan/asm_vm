@@ -28,5 +28,5 @@ int main(int argc, char *argv[]) {
     init_labels_from_file(input_file);
     encode_commands(input_file);
     fwrite(commands, sizeof(int16_t), comands_size, output_file);
-    return 2;
+    return 0;
 }
