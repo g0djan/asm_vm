@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     FILE *output_file;
     check_argc(argc);
     input_file = fopen(argv[1], "r");
-    output_file = fopen(argv[2], "w");
+    output_file = fopen(argv[2], "wb");
     check_file_exist(input_file);
     init_labels_from_file(input_file);
     encode_commands(input_file);

@@ -3,21 +3,15 @@
 #include <math.h>
 #include "encoder.h"
 
-enum command codes[8][8];
-size_t sizes[8];
-
-void init_codes() {
-    enum command c110[8] = {add, sub, mul, div_, and, or, xor, mov};
-    enum command c011[2] = {je, jne};
-    enum command c010[8] = {not, push , pop, shl, shr, mov1, mov2};
-    enum command c001[3] = {call, mov3, jmp};
-    enum command c000[5] = {in, out, reset, nop, ret};
-    memcpy(codes[6], c110, 6), sizes[6] = 8;
-    memcpy(codes[3], c011, 2), sizes[3] = 2;
-    memcpy(codes[2], c010, 8), sizes[2] = 8;
-    memcpy(codes[1], c001, 3), sizes[1] = 3;
-    memcpy(codes[0], c000, 5), sizes[0] = 5;
-}
+size_t sizes[8] = {5, 0, 8, 8, 3, 0, 2};
+enum command codes[8][8] = {
+/*000*/    {in,   out,  reset, nop,  ret},
+/*001*/    {},
+/*010*/    {not,  push, pop,   shl,  shr, mov1, mov2, cmpxchg},
+/*011*/    {add,  sub,  mul,   div_, and, or,   xor,  mov},
+/*100*/    {call, mov3, jmp},
+/*101*/    {},
+/*110*/    {je,   jne}};
 
 bool has_only_2RX_operands(struct asm_command *command) {
     return command->operands_cnt == 2 &&
@@ -53,8 +47,18 @@ uint16_t encode_command(struct asm_command *command) {
     return bitmask;
 }
 
-int8_t get_shift(int16_t num) {
-    return (int8_t)ceil(log2(num));;
+int8_t get_shift(int8_t shift, enum operand_type type) {
+    switch (type) {
+        case RX:
+        case _RX_:
+            return shift + (int8_t)3;
+        case RH:
+        case RL:
+            return shift + (int8_t)4;
+        default:
+            puts("Getting shift only for registers");
+            exit(-1);
+    }
 }
 
 int8_t get_register_code(struct operand *operand) {
@@ -65,21 +69,21 @@ int8_t get_register_code(struct operand *operand) {
         return operand->number << 1;
     }
     if (operand->type == RH) {
-        return (operand->number << 1) + (int8_t )1;
+        return (operand->number << 1) + (int8_t) 1;
     }
     puts("It's not register");
     exit(-1);
 }
 
 uint16_t encode_operands(struct asm_command *command, uint16_t bitmask) {
-    int8_t shift = get_shift(bitmask);
+    int8_t shift = (int8_t) ceil(log2(bitmask));
     int8_t register_code;
     for (size_t i = 0; i < command->operands_cnt; ++i) {
         if (command->operands[i].type == imm8) {
             bitmask |= command->operands[i].number << 8;
         } else {
             register_code = get_register_code(&command->operands[i]) << shift;
-            shift = get_shift(register_code);
+            shift = get_shift(shift, command->operands[i].type);
             bitmask |= register_code;
         }
     }
@@ -89,10 +93,9 @@ uint16_t encode_operands(struct asm_command *command, uint16_t bitmask) {
 void encode_commands(FILE *fp) {
     char line[MAX_LINE_LENGTH];
     struct asm_command command;
-    int8_t shift;
-    for (int16_t i = 0; fgets(line, MAX_LINE_LENGTH, fp); ++i) {
-        command = parse_command(line, i);
-        commands[i] = encode_command(&command);
-        commands[i] = encode_operands(&command, commands[i]);
+    for (; fgets(line, MAX_LINE_LENGTH, fp); ++comands_size) {
+        command = parse_command(line, (uint16_t)comands_size);
+        commands[comands_size] = encode_command(&command);
+        commands[comands_size] = encode_operands(&command, commands[comands_size]);
     }
 }

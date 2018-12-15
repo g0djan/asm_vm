@@ -14,7 +14,7 @@ enum operand_type {
 };
 
 enum command {
-    mov, mov1,mov2,mov3, mov4,
+    mov, mov1,mov2,mov3,
     je, jne, jmp, call,
     add, sub, mul, div_,
     and, or, xor, not,
@@ -25,7 +25,7 @@ enum command {
 
 struct operand {
     enum operand_type type;
-    int8_t number;
+    uint8_t number;
 };
 
 struct asm_command {
@@ -34,4 +34,4 @@ struct asm_command {
     size_t operands_cnt;
 };
 
-struct asm_command parse_command(char *line, int16_t line_number);
+struct asm_command parse_command(char *line, uint16_t line_number);

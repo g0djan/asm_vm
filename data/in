@@ -1,0 +1,8 @@
+ mov R0H #127
+ mov R2L #127
+ cmpxchg (R0X) R1X R2X
+abbccccddddddddeeeee:cmpxchg (R0X) R1X R2X
+ add R1X R2X
+kek    :mov R0H #120
+ push R1X
+ out R1H
