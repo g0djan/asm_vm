@@ -1,7 +1,35 @@
-#include <stdbool.h>
-#include <string.h>
-#include <math.h>
 #include "encoder.h"
+
+struct operand_pair {
+    enum operand_type first;
+    enum operand_type second;
+};
+
+#define OPERAND_PAIR(first, second) (struct operand_pair){first, second}
+
+struct operand_pair operand_classes[] = {
+        OPERAND_PAIR(RX, RX),
+        OPERAND_PAIR(RX, _RX_),
+        OPERAND_PAIR(_RX_, RX),
+        OPERAND_PAIR(RX, empty),
+        OPERAND_PAIR(imm8, empty),
+        OPERAND_PAIR(RX, imm4),
+        OPERAND_PAIR(empty, empty),
+        OPERAND_PAIR(RH, empty),
+        OPERAND_PAIR(RL, empty)};
+
+enum command short_commands[] = {mov3, je, jne, cmpxchg};
+enum command long_commands[9][8] = {
+        {mov, add, sub, mul, div_, and, or, xor},
+        {mov1},
+        {mov2},
+        {push, pop, not},
+        {call, jmp},
+        {shl, shr},
+        {ret, reset, nop},
+        {in, out}
+};
+uint8_t sizes[8] = {8, 1, 1, 3, 2, 2, 3, 2};
 
 bool has_type_operand(struct asm_command *command, enum operand_type type) {
     bool has = false;
@@ -22,8 +50,8 @@ uint8_t get_operand_class(struct asm_command *command) {
     exit(-1);
 }
 
-int8_t get_command_code(struct asm_command *command, const enum command *command_types, int8_t size) {
-    for (int8_t i = 0; i < size; ++i) {
+uint8_t get_command_code(struct asm_command *command, const enum command *command_types, uint8_t size) {
+    for (uint8_t i = 0; i < size; ++i) {
         if (command->name == command_types[i]) {
             return i;
         }
@@ -40,17 +68,17 @@ uint16_t encode_short(struct asm_command *command, uint16_t bitmask) {
 uint16_t encode_long(struct asm_command *command, uint16_t bitmask) {
     uint8_t operand_class = get_operand_class(command);
     bitmask |= operand_class << 1;
-    bitmask |= get_command_code(command, long_commands[operand_class], sizes1[operand_class]) << 4;
+    bitmask |= get_command_code(command, long_commands[operand_class], sizes[operand_class]) << 4;
     return bitmask;
 }
 
 uint16_t encode_command(struct asm_command *command) {
     uint16_t bitmask = 0;
-    bitmask |= (!has_type_operand(command, imm8) && command->operands_cnt != 3) << 0;
+    bitmask |= (command->name == jmp || (!has_type_operand(command, imm8) && command->operands_cnt != 3)) << 0;
     return bitmask ? encode_long(command, bitmask) : encode_short(command, bitmask);
 }
 
-int8_t get_register_code(struct operand *operand) {
+uint8_t get_register_code(struct operand *operand) {
     if (operand->type == RX || operand->type == _RX_) {
         return operand->number;
     }
@@ -64,7 +92,7 @@ int8_t get_register_code(struct operand *operand) {
     exit(-1);
 }
 
-int8_t get_shift(int8_t shift, enum operand_type type) {
+uint8_t get_shift(uint8_t shift, enum operand_type type) {
     switch (type) {
         case RX:
         case _RX_:
@@ -79,13 +107,13 @@ int8_t get_shift(int8_t shift, enum operand_type type) {
 }
 
 uint16_t encode_operands(struct asm_command *command, uint16_t bitmask) {
-    int8_t shift = (int8_t) (bitmask & 1 ? 8 : 3);
-    int8_t register_code;
+    uint8_t shift = (int8_t) (bitmask & 1 ? 8 : 3);
+    uint16_t register_code;
     for (size_t i = 0; i < command->operands_cnt; ++i) {
         if (command->operands[i].type == imm8) {
-            bitmask |= command->operands[i].number << 8;
+            bitmask |= (uint16_t )(command->operands[i].number) << 8;
         } else {
-            register_code = get_register_code(&command->operands[i]) << shift;
+            register_code = (uint16_t )(get_register_code(&command->operands[i])) << shift;
             shift = get_shift(shift, command->operands[i].type);
             bitmask |= register_code;
         }

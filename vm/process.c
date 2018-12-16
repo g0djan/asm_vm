@@ -1,7 +1,4 @@
-#include <opencl-c.h>
 #include "process.h"
-#include "instructions.h"
-#include "fetcher.h"
 
 void load_process(struct process *process, uint16_t *address, const char *file_path, uint16_t shift) {
     process->is_active = true;

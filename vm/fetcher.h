@@ -1,11 +1,10 @@
+#ifndef ASM_VM_FETCHER_H
+#define ASM_VM_FETCHER_H
+
 #include "process.h"
 #include "instructions.h"
 #include <math.h>
 
-#ifndef ASM_VM_FETCHER_H
-#define ASM_VM_FETCHER_H
-
-#endif //ASM_VM_FETCHER_H
 
 struct tuple3 {
     uint16_t element[3];
@@ -55,3 +54,5 @@ uint16_t fetch_command(struct process *process);
 uint8_t fetch_args_cnt(uint16_t command);
 asm_func fetch_func(uint16_t command);
 void fetch_args(uint16_t *args, uint16_t command);
+
+#endif //ASM_VM_FETCHER_H

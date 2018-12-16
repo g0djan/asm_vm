@@ -62,7 +62,7 @@ uint8_t parse_imm(const char *line) {
     return (uint8_t) n;
 }
 
-void check_diff(uint16_t diff) {
+void check_diff(uint8_t diff) {
     if (diff > 255) {
         puts("Too far label");
         exit(-1);
@@ -75,7 +75,7 @@ int8_t convert_label(char *line, uint16_t line_number) {
                          ? occur - line
                          : strlen(line);
     uint16_t label_line = get_label_line(line, operand_len);
-    uint16_t diff = label_line - line_number;
+    uint8_t diff = (uint8_t )(line_number - label_line);
     check_diff(diff);
     return (int8_t)diff;
 }
