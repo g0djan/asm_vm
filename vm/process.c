@@ -18,10 +18,11 @@ void load_process(struct process *process, uint16_t *address, const char *file_p
 }
 
 bool execute_iteration(struct process *process) {
-    int func_id = fetch_func_id(process);
-    uint8_t args_cnt = fetch_args_cnt(process, func_id);
-    uint16_t **args = fetch_args(process, func_id, args_cnt);
-    return !(instructions[func_id])(args, args_cnt);
+    uint16_t command = fetch_command(process);
+    asm_func func = fetch_func(command);
+    uint16_t args[3];
+    fetch_args(args, command);
+    return !(*func)(args, process);
 }
 
 int execute_process(struct process *process, size_t iterations) {

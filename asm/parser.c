@@ -137,7 +137,7 @@ char *cut_token(char *line, char separator, bool exit) {
 
 struct asm_command parse_command(char *line, uint16_t line_number) {
     cut_endl(line);
-    struct asm_command command;
+    DEFAULT_ASM_COMMAND(command);
     command.operands_cnt = 0;
     line = cut_token(line, ':', false);
     command.name = get_command(line);

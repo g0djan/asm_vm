@@ -10,7 +10,7 @@
 // believe in format [label]:command[ operand1][ operand2]\n\0
 
 enum operand_type {
-    _RX_, RX, RH, RL, imm4, imm8, label
+    _RX_, RX, RH, RL, imm4, imm8, empty
 };
 
 enum command {
@@ -33,5 +33,13 @@ struct asm_command {
     struct operand operands[3];
     size_t operands_cnt;
 };
+
+#define DEFAULT_ASM_COMMAND(command) \
+    struct asm_command command; \
+    command.operands_cnt = 0; \
+    for (size_t i = 0; i < 3; ++i) { \
+        command.operands[i].type = empty; \
+    }
+
 
 struct asm_command parse_command(char *line, uint16_t line_number);
